@@ -1,6 +1,7 @@
 const express = require('express')
 const { connectDB } = require('./db');
 const bodyParser = require('body-parser')
+require('dotenv').config();
 const app = express()
  
 app.use(bodyParser.json());
@@ -17,5 +18,7 @@ app.get('/', (req, res) => {
   res.send('Hello World This is again i start learning')
 })
 
+const port = process.env.PORT || 4000
 
-app.listen(4000,()=>console.log("Server is starting on port no. 4000"))
+
+app.listen(port,()=>console.log("Server is starting on port no. 4000"))
