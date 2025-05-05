@@ -1,24 +1,50 @@
-const express = require('express')
-const { connectDB } = require('./db');
-const bodyParser = require('body-parser')
+// Load environment variables
 require('dotenv').config();
-const app = express()
- 
+
+// Import dependencies
+const express = require('express');
+const bodyParser = require('body-parser');
+const passport = require('./auth');
+const { connectDB } = require('./db');
+
+// Import route handlers
+const personRoutes = require('./routes/personRoutes');
+const menuRoutes = require('./routes/menuRoutes');
+
+// Initialize Express app
+const app = express();
+
+// Connect to MongoDB
+connectDB();
+
+// Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-connectDB(); // Connect to MongoDB first
+// Initialize Passport
+app.use(passport.initialize());
 
-const personRoutes = require('./routes/personRoutes')
-const menuRoutes = require('./routes/menuRoutes')
+// Logging middleware
+const logRequest = (req, res, next) => {
+  console.log(`[${new Date().toLocaleString()}] Request made to: ${req.url}`);
+  next();
+};
 
-app.use('/person',personRoutes)
-app.use('/menu',menuRoutes)
+app.use(logRequest);
 
+// Authentication middleware
+const localAuthMiddleware = passport.authenticate('local', { session: false });
+
+// Routes
+app.use('/person', localAuthMiddleware, personRoutes);
+app.use('/menu', menuRoutes);
+
+// Default route
 app.get('/', (req, res) => {
-  res.send('Hello World This is again i start learning')
-})
+  res.send('Hello World! This is me starting to learn again.');
+});
 
-const port = process.env.PORT || 4000
-
-
-app.listen(port,()=>console.log("Server is starting on port no. 4000"))
+// Start the server
+const port = process.env.PORT || 4000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
